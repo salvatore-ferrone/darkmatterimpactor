@@ -1,0 +1,28 @@
+# Data and generated artifacts
+frames/
+inputdata/
+outputdata/
+plots/
+videos/
+
+# Jupyter notebooks (not checked in)
+*.ipynb
+
+# Python cache / env
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment / virtualenv
+venv/
+.env/
+.venv/
+.env
+
+# Editor/IDE
+.vscode/
+.idea/
+
+# Optional useful
+.DS_Store
+Thumbs.db
