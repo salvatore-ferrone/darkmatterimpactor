@@ -1,0 +1,61 @@
+## Plan: Dark Matter Stream Gap Prediction
+
+TL;DR - Build a prediction workflow for cold globular-cluster streams using an analytical Milky Way potential and a preselected LCDM subhalo population. Start by defining model choices for the Milky Way, stream sample, and subhalo selection, then create a modular pipeline that separates stream generation from impact filtering.
+
+**Steps**
+1. Survey the existing pipeline in `code/compute_orbits.py` and `code/animate_orbits.py` to reuse the MW potential, orbit integration, and subhalo data format.
+2. Define the Milky Way model for the prediction stage.
+   - Use the existing `tstrippy.Parsers.pouliasis2017pii()` analytic potential as the baseline.
+   - Record the parameters needed for stream evolution and encounter filtering.
+3. Define the stream sample.
+   - Model only cold stellar streams from disrupted globular clusters.
+   - Include both currently known Milky Way streams and synthetic "future-discovery" candidate streams to represent an extended catalogue.
+   - Create a stream metadata catalog that stores stream name, orbital parameters, age, length, width, and progenitor mass.
+4. Define the gap prediction target.
+   - Focus on the total expected number of gaps across the stream ensemble.
+   - This supports aggregate constraints and scales better than per-stream detailed morphology at first.
+5. Define the subhalo population model.
+   - Reuse the collaborator’s LCDM DM-only subhalo catalogue from `inputdata/DMsubhaloMW634Norm26PB.hdf5`.
+   - Keep the current rescaling approach from `compute_orbits.py` to map the cosmological sample into the MW potential.
+   - Allow later addition of alternate DM models via a plug-in subhalo source interface.
+6. Design the preselection filter for impactful subhalos.
+   - Use geometric/kinematic criteria rather than full stream+subhalo direct evolution.
+   - Candidate criteria: impact parameter threshold to stream orbit, relative velocity window, encounter timing within stream lifetime, and subhalo mass threshold.
+   - The filter should work stream-by-stream using each stream’s orbit and width.
+7. Draft the modular pipeline architecture.
+   - Module A: `mw_model.py` or `code/mw_model.py` for MW potential and circular velocity/E-Lz utilities.
+   - Module B: `streams.py` or `code/streams.py` for stream definitions, orbit initialization, and synthetic candidate generation.
+   - Module C: `subhalo_population.py` or `code/subhalo_population.py` for loading, scaling, and filtering the dark matter subhalo catalogue.
+   - Module D: `gap_prediction.py` or `code/gap_prediction.py` for encounter counting, gap expectation metrics, and output.
+   - Module E: `analysis.py` or `code/analysis.py` for summarizing predicted gap statistics and visualizing results.
+8. Specify data outputs and intermediate files.
+   - Stream metadata (catalog of known + synthetic streams).
+   - Filtered subhalo-stream encounter list.
+   - Gap prediction summary table for total expected gaps and per-stream contributions.
+   - Plots of stream coverage, subhalo encounter rate, and gap count versus stream properties.
+9. Plan integration with the existing orbit code.
+   - Keep `code/compute_orbits.py` as a reference for DM orbit scaling and bound-orbit selection.
+   - If needed later, use the stored `outputs/bound_orbits*.hdf5` as a secondary data source for time-dependent subhalo trajectories.
+   - Not required initially for the preselection step.
+
+**Relevant files**
+- `code/compute_orbits.py` — existing MW model and DM subhalo scaling; key reference for orbit selection.
+- `code/animate_orbits.py` — shows how the bound-orbits HDF5 data are structured and visualized.
+- `inputdata/DMsubhaloMW634Norm26PB.hdf5` — collaborator’s LCDM subhalo sample.
+
+**Verification**
+1. Confirm the MW model and orbit scaling with a simple sanity check: reproduce the bound subhalo selection and E-Lz plot from `code/compute_orbits.py`.
+2. Validate the stream catalog by encoding at least 3 known cold GC streams and 2 synthetic candidate streams, with consistent orbital parameters.
+3. Validate the subhalo preselection by checking the encounter fraction against the full population and ensuring filter rules are realistic.
+4. Generate a draft prediction report showing the total expected gap count and the stream contribution breakdown.
+
+**Decisions**
+- Use cold globular-cluster streams only for the first phase.
+- Include both known streams and synthetic future-discovery candidates in the stream sample.
+- Predict total expected gap counts across the stream ensemble rather than exact gap positions.
+- Use geometric/kinematic preselection of subhalos that can plausibly impact the streams.
+
+**Further Considerations**
+1. We should decide whether synthetic streams are drawn from the same MW potential family as known streams or from a separate sampling distribution.
+2. Later phases may want a second module to convert preselected encounters into predicted gap sizes and detectability.
+3. We should decide whether the stream catalog is stored as a simple JSON/CSV metadata file or as an HDF5 dataset for efficiency.

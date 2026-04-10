@@ -1,0 +1,37 @@
+name: darkmatter-streams
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  # Core scientific Python stack
+  - python=3.12
+  - numpy
+  - scipy
+  - matplotlib
+  - astropy
+  - h5py
+  
+  # Astronomy and dynamics
+  - galpy
+  
+  # Data visualization
+  - plotly
+  
+  # Jupyter and development
+  - jupyter
+  - ipykernel
+  - notebook
+  
+  # Code quality
+  - black
+  - flake8
+  
+  # Build tools for tstrippy
+  - meson
+  - ninja
+  - gfortran
+  
+  # Build tools
+  - pip
+  # NOTE: tstrippy must be installed separately after environment creation
+  # See README.md for detailed tstrippy installation instructions
